@@ -3,6 +3,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Globalization;
 using CSV.Database;
+using CSV.Helpers;
 using CSV.Interfaces;
 using CSV.Models;
 using CsvHelper;
@@ -35,24 +36,59 @@ public class CSVReadFiles : ICsvReadFile
         var query = @"hourly_data_csv";
         foreach (var row in data)
         {
-            await db.ExecuteAsync(query, new
-            {
-                row.SiteId, row.startHour, row.finalHour, row.bytesUpload, row.bytesDownload
-            }, commandType: CommandType.StoredProcedure);
+            var parameters = new DynamicParameters();
+            parameters.Add("id", row.SiteId);
+            parameters.Add("start_hour", row.startHour);
+            parameters.Add("final_hour", row.finalHour);
+            parameters.Add("minutes_used", row.minutesUsed);
+            parameters.Add("bytes_upload", row.bytesUpload);
+            parameters.Add("bytes_download", row.bytesDownload);
+            
+            await db.ExecuteAsync(query, parameters, commandType: CommandType.StoredProcedure);
         }
         return data;
     }
 
     public async Task<IList<Hourly>> csvReadFileAndCopyToDB()
     {
-        var filePath = @"/Users/omegajohn/Documents/Files/Hourly_data.csv";
+        var filePath = @"C:\Users\jespinozam\Downloads\Files\Hourly_Data.csv";
         var data = new List<Hourly>();
-        using (var streamReader = new StreamReader(filePath))
+        try
         {
-            using (var csvReader = new CsvReader(streamReader, CultureInfo.InvariantCulture))
+            using (var streamReader = new StreamReader(filePath))
             {
-                data = csvReader.GetRecords<Hourly>().ToList();
+                using (var csvReader = new CsvReader(streamReader, CultureInfo.InvariantCulture))
+                {
+                    await csvReader.ReadAsync();
+                    csvReader.ReadHeader();
+                    csvReader.Context.RegisterClassMap<HourlyDataMap>();
+                    //Defaulter<long> parserToInt = new Defaulter<long>();
+                    data = csvReader.GetRecords<Hourly>().ToList();
+                    /*
+                    foreach (var row in data)
+                    {
+                        data.Add(new Hourly
+                        {
+                            SiteId = csvReader.GetField("SiteID"),
+                            startHour = Convert.ToDateTime(csvReader.GetField("Start hour")),
+                            finalHour = Convert.ToDateTime(csvReader.GetField("Final hour")),
+                            minutesUsed = Convert.ToInt32(csvReader.GetField("Minutes connected")),
+                            bytesUpload = Convert.ToInt32(csvReader.GetField("Uplink VolumeUsage(bits)")),
+                            bytesDownload = Convert.ToInt32(csvReader.GetField<long>("Downlink VolumeUsage(bits)", parserToInt))
+                        });
+                        if (parserToInt.GetLastError() != null)
+                        {
+                            string error = "Error: " + parserToInt.GetOffendingValue();
+                            Console.WriteLine(error);
+                        }
+                    }
+                    */
+                }
             }
+        }
+        catch (Exception e)
+        {
+            throw new Exception(e.Message);
         }
 
         return data;
