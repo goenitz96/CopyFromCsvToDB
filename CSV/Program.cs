@@ -34,8 +34,16 @@ var copyToDbJob = builder.Services.BuildServiceProvider().GetService<ICsvReadFil
 var deleteFileJob = builder.Services.BuildServiceProvider().GetService<ICsvReadFile>();
 
 /*Cron Jobs Schedule*/
+recurringJob.AddOrUpdate("download-file-csv", () => 
+    downloadFileJob.downloadFtpCsvFile(ftpServer, ftpPath, ftpFile, downloadPath, userName, password), 
+    Cron.Hourly(10));
+
+recurringJob.AddOrUpdate("copy-to-db", () => 
+    copyToDbJob.saveTheData(), 
+    Cron.Hourly(15));
+
 recurringJob.AddOrUpdate("delete-file-csv", () => 
-    deleteFileJob.deleteFile(downloadPath), Cron.Hourly(10));
+    deleteFileJob.deleteFile(downloadPath), Cron.Hourly(20));
 
 
 var app = builder.Build();
