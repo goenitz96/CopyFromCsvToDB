@@ -50,14 +50,14 @@ public class CSVReadFiles : ICsvReadFile
         return data;
     }
 
-    public void downloadFtpCsvFile(string userName, string password, string host, string fileName, string ftpPath,
-        string downloadPath)
+    public void downloadFtpCsvFile(string userName, string password, string host, string fileName, string ftpPath)
     {
-        var fullPath = $"{ftpPath}/{fileName}";
+        var fullPath = $"/{ftpPath}/{fileName}";
+        var downloadFullPath = "C:\\Users\\jespinozam\\Downloads\\Files";
         using (SftpClient ftp = new SftpClient(new PasswordConnectionInfo(host, userName, password)))
         {
             ftp.Connect();
-            using (Stream stream = File.Create(downloadPath + @"/" + fileName))
+            using (Stream stream = File.Create(downloadFullPath + "\\" + fileName))
             {
                 ftp.DownloadFile(fullPath, stream);
             }
@@ -65,12 +65,12 @@ public class CSVReadFiles : ICsvReadFile
         }
     }
 
-    public void deleteFile(string downloadPath)
+    public void deleteFile()
     {
-        var fullPath = $"{downloadPath}";
+        var fullPath =  @"C:\Users\jespinozam\Downloads\Files\Hourly_Data.csv";
         try
         {
-            if (File.Exists(downloadPath))
+            if (File.Exists(fullPath))
             {
                 File.Delete(fullPath);
             }

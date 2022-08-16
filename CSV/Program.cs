@@ -35,7 +35,7 @@ var deleteFileJob = builder.Services.BuildServiceProvider().GetService<ICsvReadF
 
 /*Cron Jobs Schedule*/
 recurringJob.AddOrUpdate("download-file-csv", () => 
-    downloadFileJob.downloadFtpCsvFile(ftpServer, ftpPath, ftpFile, downloadPath, userName, password), 
+    downloadFileJob.downloadFtpCsvFile(userName, password, ftpServer, ftpFile, ftpPath), 
     Cron.Hourly(10));
 
 recurringJob.AddOrUpdate("copy-to-db", () => 
@@ -43,7 +43,7 @@ recurringJob.AddOrUpdate("copy-to-db", () =>
     Cron.Hourly(15));
 
 recurringJob.AddOrUpdate("delete-file-csv", () => 
-    deleteFileJob.deleteFile(downloadPath), Cron.Hourly(20));
+    deleteFileJob.deleteFile(), Cron.Hourly(20));
 
 
 var app = builder.Build();
