@@ -13,6 +13,7 @@ var password = config.GetConnectionString("FtpPassword");
 var ftpServer = config.GetConnectionString("FtpServer");
 var ftpPath = config.GetConnectionString("FtpPath");
 var ftpFile = config.GetConnectionString("FtpFile");
+var downloadPath = config.GetConnectionString("DownloadPath");
 
 /*Injection of database*/
 var MySqlConnection = new MySQLConfiguration(mysql);
@@ -34,7 +35,7 @@ var deleteFileJob = builder.Services.BuildServiceProvider().GetService<ICsvReadF
 
 /*Cron Jobs Schedule*/
 recurringJob.AddOrUpdate("delete-file-csv", () => 
-    deleteFileJob.deleteFile(ftpFile, ftpPath), Cron.Hourly(10));
+    deleteFileJob.deleteFile(downloadPath), Cron.Hourly(10));
 
 
 var app = builder.Build();

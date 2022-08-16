@@ -65,12 +65,12 @@ public class CSVReadFiles : ICsvReadFile
         }
     }
 
-    public void deleteFile(string fileName, string downloadPath)
+    public void deleteFile(string downloadPath)
     {
-        var fullPath = $"{downloadPath}/{fileName}";
+        var fullPath = $"{downloadPath}";
         try
         {
-            if (File.Exists(fullPath))
+            if (File.Exists(downloadPath))
             {
                 File.Delete(fullPath);
             }
