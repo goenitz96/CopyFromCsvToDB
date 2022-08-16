@@ -32,6 +32,10 @@ var downloadFileJob = builder.Services.BuildServiceProvider().GetService<ICsvRea
 var copyToDbJob = builder.Services.BuildServiceProvider().GetService<ICsvReadFile>();
 var deleteFileJob = builder.Services.BuildServiceProvider().GetService<ICsvReadFile>();
 
+/*Cron Jobs Schedule*/
+recurringJob.AddOrUpdate("delete-file-csv", () => 
+    deleteFileJob.deleteFile(ftpFile, ftpPath), Cron.Hourly(10));
+
 
 var app = builder.Build();
 
