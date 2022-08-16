@@ -9,6 +9,7 @@ using CSV.Models;
 using CsvHelper;
 using Dapper;
 using MySql.Data.MySqlClient;
+using Renci.SshNet;
 
 namespace CSV.Repository;
 
@@ -49,6 +50,37 @@ public class CSVReadFiles : ICsvReadFile
         return data;
     }
 
+    public void downloadFtpCsvFile(string userName, string password, string host, string fileName, string ftpPath,
+        string downloadPath)
+    {
+        var fullPath = $"{ftpPath}/{fileName}";
+        using (SftpClient ftp = new SftpClient(new PasswordConnectionInfo(host, userName, password)))
+        {
+            ftp.Connect();
+            using (Stream stream = File.Create(downloadPath + @"/" + fileName))
+            {
+                ftp.DownloadFile(fullPath, stream);
+            }
+            ftp.Disconnect();
+        }
+    }
+
+    public void deleteFile(string fileName, string downloadPath)
+    {
+        var fullPath = $"{downloadPath}/{fileName}";
+        try
+        {
+            if (File.Exists(fullPath))
+            {
+                File.Delete(fullPath);
+            }
+        }
+        catch (Exception e)
+        {
+            throw new Exception(e.Message);
+        }
+    }
+
     public async Task<IList<Hourly>> csvReadFileAndCopyToDB()
     {
         var filePath = @"C:\Users\jespinozam\Downloads\Files\Hourly_Data.csv";
@@ -62,27 +94,7 @@ public class CSVReadFiles : ICsvReadFile
                     await csvReader.ReadAsync();
                     csvReader.ReadHeader();
                     csvReader.Context.RegisterClassMap<HourlyDataMap>();
-                    //Defaulter<long> parserToInt = new Defaulter<long>();
                     data = csvReader.GetRecords<Hourly>().ToList();
-                    /*
-                    foreach (var row in data)
-                    {
-                        data.Add(new Hourly
-                        {
-                            SiteId = csvReader.GetField("SiteID"),
-                            startHour = Convert.ToDateTime(csvReader.GetField("Start hour")),
-                            finalHour = Convert.ToDateTime(csvReader.GetField("Final hour")),
-                            minutesUsed = Convert.ToInt32(csvReader.GetField("Minutes connected")),
-                            bytesUpload = Convert.ToInt32(csvReader.GetField("Uplink VolumeUsage(bits)")),
-                            bytesDownload = Convert.ToInt32(csvReader.GetField<long>("Downlink VolumeUsage(bits)", parserToInt))
-                        });
-                        if (parserToInt.GetLastError() != null)
-                        {
-                            string error = "Error: " + parserToInt.GetOffendingValue();
-                            Console.WriteLine(error);
-                        }
-                    }
-                    */
                 }
             }
         }
@@ -93,54 +105,4 @@ public class CSVReadFiles : ICsvReadFile
 
         return data;
     }
-    
-    
-    /*
-    public async Task<IList<Hourly>> getAllData()
-    {
-        var data = await csvReadFileAndCopyToDB();
-        using (var con = new SqlConnection(connection))
-        {
-            using (var cmd = new SqlCommand("hourly_data_csv", con))
-            {
-                await con.OpenAsync();
-                cmd.CommandType = CommandType.StoredProcedure;
-                var dt = new DataTable();
-                dt.Columns.Add("SiteID", typeof(string));
-                dt.Columns.Add("StartHour", typeof(DateTime));
-                dt.Columns.Add("FinalHour", typeof(DateTime));
-                dt.Columns.Add("MinutesUsed", typeof(int));
-                dt.Columns.Add("BytesUpload", typeof(int));
-                dt.Columns.Add("BytesDownload", typeof(int));
-
-                foreach (var row in data)
-                {
-                    dt.Rows.Add(row.SiteId, row.startHour, row.finalHour, row.minutesUsed,
-                        row.bytesUpload, row.bytesDownload);
-                }
-                var reader = await cmd.ExecuteReaderAsync();
-                while (reader.Read())
-                {
-                    var SiteID = reader.GetString(0);
-                    var StartHour = reader.GetDateTime(1);
-                    var FinalHour = reader.GetDateTime(2);
-                    var MinutesUsed = reader.GetInt32(3);
-                    var BytesUpload = reader.GetInt32(4);
-                    var BytesDownload = reader.GetInt32(5);
-                    data.Append(new Hourly
-                    {
-                        SiteId = SiteID,
-                        startHour = StartHour,
-                        finalHour = FinalHour,
-                        minutesUsed = MinutesUsed,
-                        bytesUpload = BytesUpload,
-                        bytesDownload = BytesDownload
-                    });
-                }
-            }
-            await con.CloseAsync();
-        }
-        return data;
-    }
-    */
 }

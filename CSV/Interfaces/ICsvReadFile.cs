@@ -7,5 +7,6 @@ public interface ICsvReadFile
     Task<IList<Hourly>> csvReadFileAndCopyToDB();
 
     Task<IList<Hourly>> saveTheData();
-    //Task<IList<Hourly>> getAllData();
+    void downloadFtpCsvFile(string userName, string password, string host, string fileName, string ftpPath, string downloadPath);
+    void deleteFile(string fileName, string downloadPath);
 }
