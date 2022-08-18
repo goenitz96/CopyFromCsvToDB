@@ -18,4 +18,10 @@ public class HourlyController : Controller
     {
         return Ok(await service.saveTheData());
     }
+    
+    [HttpPost("/insertData")]
+    public async Task<IActionResult> insertDataIntoHourlyBilling()
+    {
+        return Ok(service.insertIntoHourlyBilling());
+    }
 }

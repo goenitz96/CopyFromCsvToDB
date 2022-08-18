@@ -31,6 +31,7 @@ builder.Services.AddHangfireServer();
 var recurringJob = builder.Services.BuildServiceProvider().GetService<IRecurringJobManager>();
 var downloadFileJob = builder.Services.BuildServiceProvider().GetService<ICsvReadFile>();
 var copyToDbJob = builder.Services.BuildServiceProvider().GetService<ICsvReadFile>();
+var insertIntoHourlyBillings = builder.Services.BuildServiceProvider().GetService<ICsvReadFile>();
 var deleteFileJob = builder.Services.BuildServiceProvider().GetService<ICsvReadFile>();
 
 /*Cron Jobs Schedule*/
@@ -40,10 +41,13 @@ recurringJob.AddOrUpdate("download-file-csv", () =>
 
 recurringJob.AddOrUpdate("copy-to-db", () => 
     copyToDbJob.saveTheData(), 
-    Cron.Hourly(15));
+    Cron.Hourly(13));
+
+recurringJob.AddOrUpdate("insert-into-hourly-billings", () => 
+    insertIntoHourlyBillings.insertIntoHourlyBilling(), Cron.Hourly(16));
 
 recurringJob.AddOrUpdate("delete-file-csv", () => 
-    deleteFileJob.deleteFile(), Cron.Hourly(20));
+    deleteFileJob.deleteFile(), Cron.Hourly(18));
 
 
 var app = builder.Build();

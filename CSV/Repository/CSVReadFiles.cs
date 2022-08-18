@@ -50,10 +50,25 @@ public class CSVReadFiles : ICsvReadFile
         return data;
     }
 
+    public async Task insertIntoHourlyBilling()
+    {
+        var db = dbConnection();
+        await db.OpenAsync();
+        var query = "insertIntoHourlyBillings";
+        try
+        {
+            await db.ExecuteAsync(query, new {}, commandType: CommandType.StoredProcedure);
+        }
+        catch (Exception e)
+        {
+            throw new Exception(e.Message);
+        }
+    }
+
     public void downloadFtpCsvFile(string userName, string password, string host, string fileName, string ftpPath)
     {
         var fullPath = $"/{ftpPath}/{fileName}";
-        var downloadFullPath = "C:\\Users\\jespinozam\\Downloads\\Files";
+        var downloadFullPath = "C:\\VsatFiles";
         using (SftpClient ftp = new SftpClient(new PasswordConnectionInfo(host, userName, password)))
         {
             ftp.Connect();
@@ -67,7 +82,7 @@ public class CSVReadFiles : ICsvReadFile
 
     public void deleteFile()
     {
-        var fullPath =  @"C:\Users\jespinozam\Downloads\Files\Hourly_Data.csv";
+        var fullPath = "C:\\VsatFiles\\Hourly_Data.csv";
         try
         {
             if (File.Exists(fullPath))
@@ -83,7 +98,7 @@ public class CSVReadFiles : ICsvReadFile
 
     public async Task<IList<Hourly>> csvReadFileAndCopyToDB()
     {
-        var filePath = @"C:\Users\jespinozam\Downloads\Files\Hourly_Data.csv";
+        var filePath = "C:\\VsatFiles\\Hourly_Data.csv";
         var data = new List<Hourly>();
         try
         {
