@@ -27,6 +27,13 @@ builder.Services.AddScoped<ICsvReadFile, CSVReadFiles>();
 builder.Services.HangFireConfiguration(config);
 builder.Services.AddHangfireServer();
 
+/* Injection of jupiter service*/
+builder.Services.AddHttpClient<IJupiterService, JupiterRepository>(x =>
+{
+    x.BaseAddress = new Uri(config.GetConnectionString("JupiterURL"));
+});
+builder.Services.AddScoped<IJupiterService, JupiterRepository>();
+
 /*Injection of cron jobs service*/
 var recurringJob = builder.Services.BuildServiceProvider().GetService<IRecurringJobManager>();
 var downloadFileJob = builder.Services.BuildServiceProvider().GetService<ICsvReadFile>();
