@@ -1,3 +1,4 @@
+using System.Security.Cryptography.X509Certificates;
 using CSV.Database;
 using CSV.Helpers;
 using CSV.Interfaces;
@@ -24,6 +25,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<ICsvReadFile, CSVReadFiles>();
+builder.Services.AddScoped<IUpdateTerminalsService, UpdateTerminalsRepository>();
 builder.Services.HangFireConfiguration(config);
 builder.Services.AddHangfireServer();
 
@@ -40,6 +42,7 @@ var downloadFileJob = builder.Services.BuildServiceProvider().GetService<ICsvRea
 var copyToDbJob = builder.Services.BuildServiceProvider().GetService<ICsvReadFile>();
 var insertIntoHourlyBillings = builder.Services.BuildServiceProvider().GetService<ICsvReadFile>();
 var deleteFileJob = builder.Services.BuildServiceProvider().GetService<ICsvReadFile>();
+var updateTerminalsJob = builder.Services.BuildServiceProvider().GetService<IUpdateTerminalsService>();
 
 /*Cron Jobs Schedule*/
 recurringJob.AddOrUpdate("download-file-csv", () => 
@@ -55,6 +58,9 @@ recurringJob.AddOrUpdate("insert-into-hourly-billings", () =>
 
 recurringJob.AddOrUpdate("delete-file-csv", () => 
     deleteFileJob.deleteFile(), Cron.Hourly(18));
+
+recurringJob.AddOrUpdate("update-terminals-full", () =>
+    updateTerminalsJob.AllInOneJob(), Cron.Daily(0,0));
 
 
 var app = builder.Build();

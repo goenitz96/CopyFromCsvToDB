@@ -19,6 +19,5 @@ public class Hourly
     public long bytesUpload { get; set; }
     [Name("Downlink VolumeUsage(bits)")]
     public long bytesDownload { get; set; }
-    [NotMapped] 
-    public List<Terminals> Terminals { get; set; }
+    
 }

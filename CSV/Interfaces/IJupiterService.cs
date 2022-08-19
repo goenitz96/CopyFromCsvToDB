@@ -4,5 +4,6 @@ namespace CSV.Interfaces;
 
 public interface IJupiterService
 {
-    Task<IList<Terminal>> getDataFromJupiter();
+    Task<IList<Terminal>> getDataFromJupiterOld();
+    Task<IList<TerminalAppend>> getDataFromJupiterNew();
 }

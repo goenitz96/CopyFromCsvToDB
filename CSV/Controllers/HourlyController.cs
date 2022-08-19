@@ -8,9 +8,13 @@ namespace CSV.Controllers;
 public class HourlyController : Controller
 {
     private readonly ICsvReadFile service;
-    public HourlyController(ICsvReadFile service)
+    private readonly IJupiterService jupiterService;
+    private readonly IUpdateTerminalsService terminalService;
+    public HourlyController(ICsvReadFile service, IJupiterService jupiterService, IUpdateTerminalsService terminalService)
     {
         this.service = service;
+        this.jupiterService = jupiterService;
+        this.terminalService = terminalService;
     }
     
     [HttpPost]
@@ -23,5 +27,30 @@ public class HourlyController : Controller
     public async Task<IActionResult> insertDataIntoHourlyBilling()
     {
         return Ok(service.insertIntoHourlyBilling());
+    }
+    
+    [HttpGet]
+    public async Task<IActionResult> getAll()
+    {
+        return Ok(await jupiterService.getDataFromJupiterOld());
+    }
+    
+    [HttpPost("/updateTerminals")]
+    public async Task<IActionResult> updateTerminals()
+    {
+        return Ok(await terminalService.UpdateTerminals());
+    }
+    
+    [HttpPost("/updateTerminalsappend")]
+    public async Task<IActionResult> updateTerminalsAppend()
+    {
+        return Ok(await terminalService.UpdateTerminalsAppend());
+    }
+    
+    [HttpPost("/allinonejob")]
+    public async Task<IActionResult> allinonejob()
+    {
+        await terminalService.AllInOneJob();
+        return Ok();
     }
 }
